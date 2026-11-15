@@ -7,9 +7,9 @@ Kod po angielsku, opisy i komunikaty po polsku. Target: .NET 10, C# 14.
 ## 1. Decyzje
 
 1. **Płatnik: `switch` do kroku 05, interfejs `IDiscountStrategy` od kroku 07.** Kroki 05 i 07 w tabeli są źródłem prawdy.
-2. **`Patient` dostaje `Pesel` jako `string` w kroku 04, a jako `readonly struct Pesel` w kroku 06.** Refaktoryzacja jest celowa i pokazana na sali.
+2. **`Patient.Pesel` jest `string` od kroku 04 do końca.** Pierwotny plan miał `readonly struct Pesel` w kroku 06, ale usunięto go dla uproszczenia. Walidacja to funkcja `IsValidPesel` w `Program.cs`. Typ wartościowy pokazuje demo 08.
 3. **Interfejsy w `Lab`:** `IDiscountStrategy` w kroku 07, `IEntityRepository<T>` w kroku 08. `IRenderable` z dema 10 zostaje demo-only.
-4. **Zapis JSON nie serializuje obiektów domeny.** `Sample` trzyma strategię rabatu (interfejs), której `System.Text.Json` nie odtworzy. W kroku 10 `SampleDto` przechowuje `PayerType` i mapuje się do domeny przez `DiscountStrategies.For`. To jest punkt do omówienia, nie błąd.
+4. **Zapis CSV nie serializuje obiektów domeny.** `Sample` trzyma strategię rabatu (interfejs), której nie da się odtworzyć z pliku. W kroku 10 `SampleStorage` zapisuje wiersze wprost z `Sample`, a wczytuje do rekordu `SampleRecord` z `PayerType`. Rekord mapuje się do domeny przez `DiscountStrategies.For`. To jest punkt do omówienia, nie błąd.
 5. **Jedno badanie na próbkę.** Upraszcza model i sumy w raportach.
 6. **Cena jest liczona przy rejestracji i zapisywana w `Sample.Price`.** Zmiana cennika nie zmienia istniejących próbek.
 7. **Jeśli dema 03 pokazuje `int.TryParse` z `out`, zanim `out` zostanie omówiony w module 05.** Krok 01 używa `int.TryParse(input, out var choice)`. Krok 02 pokazuje `out` jako wzorzec, a krok 06 zamienia walidację na strukturę.
@@ -27,23 +27,12 @@ public enum SampleStatus { Registered, InAnalysis, Completed, Cancelled }
 
 public abstract class Entity { public int Id { get; set; } }
 
-public readonly struct Pesel : IEquatable<Pesel>      // krok 06; walidacja: tylko długość 11 i cyfry
+public class Patient : Entity
 {
-    public Pesel(string value);                       // rzuca ArgumentException, gdy nieprawidłowy
-    public static bool IsValid(string? input);
-    public static bool TryParse(string? input, out Pesel pesel);
-    public string Value { get; }
-    public bool Equals(Pesel other);                  // równość po wartości
-    public static bool operator ==(Pesel left, Pesel right);
-    public static bool operator !=(Pesel left, Pesel right);
-}
-
-public class Patient : Entity                         // Pesel: string w kroku 04, Pesel od kroku 06
-{
-    public Patient(string firstName, string lastName, Pesel pesel);
+    public Patient(string firstName, string lastName, string pesel);   // walidację PESEL robi Program
     public string FirstName { get; }
     public string LastName { get; }
-    public Pesel Pesel { get; }
+    public string Pesel { get; }
 }
 
 public class LabTest
@@ -53,11 +42,7 @@ public class LabTest
     public string Name { get; }
     public decimal BasePrice { get; }
     public string TubeType { get; }
-}
-
-public static class TestCatalog                       // krok 03: Dictionary<string, decimal>; krok 04: klasa statyczna
-{
-    public static IReadOnlyDictionary<string, LabTest> Tests { get; }
+    public static IReadOnlyDictionary<string, LabTest> LoadCatalog(string path);   // krok 10: tests.csv przez InvariantCulture
 }
 
 public interface IDiscountStrategy                    // krok 07 (od kroku 05 zastępuje switch po PayerType)
@@ -111,7 +96,6 @@ public interface IEntityRepository<T> where T : Entity   // krok 08
     T Add(T entity);                                  // nadaje Id
     T? GetById(int id);
     IReadOnlyList<T> GetAll();
-    void Update(T entity);
 }
 public class InMemoryRepository<T> : IEntityRepository<T> where T : Entity { }
 
@@ -233,7 +217,7 @@ Menu od kroku 01 (kolejność stała):
 3. Zmień status próbki
 4. Drukuj etykietę
 5. Raporty
-6. Import katalogu / zapis danych
+6. Zapisz próbki
 0. Wyjście
 ```
 
@@ -282,7 +266,7 @@ Menu od kroku 01 (kolejność stała):
 ### Krok 04 – klasy, właściwości, konstruktory, `static`
 
 - **Cel:** refaktoryzacja na klasy. Zachowanie musi być identyczne z krokiem 03.
-- **Powstaje:** `Lab.Domain` (biblioteka), `Patient`, `Sample`, `LabTest`, `TestCatalog` jako klasa statyczna. `Patient.Pesel` jest jeszcze `string`.
+- **Powstaje:** `Lab.Domain` (biblioteka), `Patient`, `Sample`, `LabTest` z `LoadCatalog`. `Patient.Pesel` to `string`.
 - **Sesja (akceptacja):** te same wejścia i wyjścia co w kroku 03. Pokazujemy `git diff`-owi uczestników, że wynik się nie zmienił.
 - **Brzydkie:** `Sample` nie ma jeszcze priorytetu ani płatnika.
 - **Kompozycja:** `Sample` ma pola `Patient` i `LabTest` (próbka *ma* pacjenta i badanie, nie *jest* pacjentem). Nie dziedziczy po nich. Kontrast z dziedziczeniem z modułu 10.
@@ -303,16 +287,10 @@ Menu od kroku 01 (kolejność stała):
 
 ### Krok 06 – `struct`, równość, operatory, `ToString`
 
-- **Cel:** PESEL jako typ wartościowy.
-- **Powstaje:** `readonly struct Pesel` z `IsValid`, `TryParse`, `Value`, `Equals`, `==`, `ToString`. `Patient.Pesel` zmienia typ na `Pesel`. Walidacja z kroku 02 przechodzi do struktury.
-- **Sesja:**
-  ```
-  Podaj PESEL: 123
-  Błąd: nieprawidłowy PESEL.
-  Podaj PESEL: 80072103403
-  Te same PESEL-e są równe: True
-  ```
-- **Brzydkie:** nic. Walidacja jest celowo prosta (długość i cyfry), więc uwaga skupia się na typie wartościowym.
+- **Cel:** wykład o typach wartościowych i równości, bez zmian w `Lab`.
+- **Powstaje:** nic w projekcie. `Pesel` zostaje `string` (decyzja 2). Typ wartościowy i `==` pokazuje demo 08 (punkt GPS).
+- **Sesja:** demo 08, bez kroku w `Lab`.
+- **Brzydkie:** nic.
 
 ### Krok 07 – interfejsy, polimorfizm
 
@@ -337,7 +315,7 @@ Menu od kroku 01 (kolejność stała):
 ### Krok 09 – delegaty, zdarzenia, lambdy
 
 - **Cel:** zmiana statusu rozgłasza zdarzenie.
-- **Powstaje:** `Sample.StatusChanged`, `SampleStatusChangedEventArgs`. Menu „Zmień status” wywołuje `Start`, `Complete` lub `Cancel`. Subskrybenci: lambda „SMS” i lambda „dziennik”.
+- **Powstaje:** `Sample.StatusChanged`, `SampleStatusChangedEventArgs`. Menu „Zmień status” wywołuje `Start`, `Complete` lub `Cancel`. Subskrybent: `SampleNotifications.OnStatusChanged`, który wypisuje SMS i wpis do dziennika.
 - **Sesja:**
   ```
   Id próbki: 1
@@ -347,28 +325,28 @@ Menu od kroku 01 (kolejność stała):
   ```
 - **Brzydkie:** SMS to `Console.WriteLine`. Nie ma prawdziwej wysyłki, celowo.
 
-### Krok 10 – wejście/wyjście, JSON
+### Krok 10 – wejście/wyjście, CSV
 
 - **Cel:** import katalogu, zapis i odczyt próbek.
-- **Powstaje:** `TestCatalogLoader` (CSV z `InvariantCulture`), `SampleDto` i zapis/odczyt `data/samples.json`. Mapowanie `PayerType` na strategię przez `DiscountStrategies.For`.
+- **Powstaje:** `LabTest.LoadCatalog` (CSV z `InvariantCulture`), `SampleStorage` (zapis i odczyt `data/samples.csv`: separator `;`, pierwszy wiersz to nagłówek), rekord `SampleRecord`. Mapowanie `PayerType` na strategię przez `DiscountStrategies.For`.
 - **Sesja (import i zapis):**
   ```
-  Zaimportowano 8 badań z data/tests.csv
-  Zapisano 1 próbkę do data/samples.json
+  Załadowano badań: 8
+  Zapisano 1 próbek do data/samples.csv
   ```
-- **Brzydkie:** nic. Błędna cena w `tests.csv` daje `FormatException`, to celowy przykład.
+- **Brzydkie:** pola nie są escapowane. Średnik w imieniu rozsypie wiersz, to dobre na omówienie. Błędna cena w `tests.csv` daje `FormatException`, to celowy przykład.
 
 ### Krok 11 – wyjątki i etykieta (napisy)
 
 - **Cel:** nielegalne przejścia i złe dane wejściowe jako wyjątki, etykieta próbki i walidacja kodu.
-- **Powstaje:** `InvalidStatusTransitionException`, `ArgumentException` przy nieznanym kodzie badania, `try`/`catch` w menu, `finally` przy wyjściu z programu. Także `Label.Build` (`StringBuilder`, `ToString("C", pl-PL)`) i `SampleCode.IsValid` (regex `^LAB-\d{4}-\d{6}$`).
+- **Powstaje:** `InvalidStatusTransitionException`, `KeyNotFoundException` przy nieznanym kodzie badania lub próbce, `try`/`catch` w pętli menu, `finally` przy wyjściu z programu. Także `Label.Build` (`StringBuilder`, `ToString("C", pl-PL)`) i `SampleCode.IsValid` (regex `^LAB-\d{4}-\d{6}$`).
 - **Sesja (wyjątki):**
   ```
   Id próbki: 1
   1 rozpocznij analizę, 2 zakończ, 3 anuluj: 2
   Błąd: Nie można przejść ze statusu Registered do Completed.
   Kod badania: XYZ
-  Błąd: nieznany kod badania.
+  Błąd: nieznany kod badania lub próbka.
   Zamykam aplikację.
   ```
 - **Sesja (etykieta):**
@@ -407,7 +385,7 @@ workshop/
 ├─ README.md               # historia, lista kroków, PESEL-e z sekcji 6
 ├─ data/
 │  ├─ tests.csv            # sekcja 5
-│  └─ samples.json         # powstaje w kroku 10
+│  └─ samples.csv          # powstaje w kroku 10
 ├─ Lab/
 │  ├─ Lab.Domain/          # od kroku 04
 │  └─ Lab.ConsoleApp/      # menu, od kroku 01
