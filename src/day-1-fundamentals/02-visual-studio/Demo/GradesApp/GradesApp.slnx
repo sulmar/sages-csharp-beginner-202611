@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Grades.Domain/Grades.Domain.csproj" />
+  <Project Path="GradesApp/GradesApp.csproj" />
+</Solution>
