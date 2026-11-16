@@ -19,6 +19,7 @@ Materiały do trzydniowego szkolenia z C# i .NET 10 (LTS). To repo startowe: ka�
 | `src/day-3-libraries/` | Moduły z bibliotek (I/O, wyjątki, LINQ) |
 | `workshop/Lab/` | Projekt warsztatowy `Lab`, rośnie przez trzy dni |
 | `docs/lab.md` | Opis kroków projektu `Lab` |
+| `docs/dotnet-cli-cheatsheet.md` | Ściąga z poleceń `dotnet` CLI |
 
 ## Wymagania
 
