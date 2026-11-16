@@ -19,52 +19,56 @@ const string Menu = """
     Wybierz opcję:
     """;
 
-Console.Write(Menu);
-
-string input = Console.ReadLine();
-
-
-// Wybór opcji za pomocą instrukcji if-else
-
-/*
-    if (input == "1")
-    {
-        Console.WriteLine("Wybrano opcję 1: Zarejestruj próbkę");
-    }
-    else if (input == "2")
-    {
-        Console.WriteLine("Wybrano opcję 2: Lista próbek");
-    }
-    else if (input == "0")
-    {
-        Console.WriteLine("Wybrano opcję 0: Wyjście");
-    }
-    else
-    {
-        Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
-    }
-*/
-
-// Wybór opcji za pomocą instrukcji switch
-switch (input)
+while (true)
 {
-    case "1":
-        RegisterSample();
-        break;
-    case "2":
-        Console.WriteLine("Wybrano opcję 2: Lista próbek");
-        break;
-    case "3":
-        var location = GetLocation();
-        location.lon += 0.1f; // Przesunięcie lokalizacji o 0.1 stopnia w prawo (na wschód)
-        Console.WriteLine($"Wybrano opcję 3: Ustal lokalizację pacjenta. Lokalizacja: ({location.lat}, {location.lon})");
-        break;
-    case "0":
-        Console.WriteLine("Wybrano opcję 0: Wyjście");
-        break;
-    default:
-        Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
-        break;
+
+    Console.Write(Menu);
+
+    string input = Console.ReadLine();
+
+
+    // Wybór opcji za pomocą instrukcji if-else
+
+    /*
+        if (input == "1")
+        {
+            Console.WriteLine("Wybrano opcję 1: Zarejestruj próbkę");
+        }
+        else if (input == "2")
+        {
+            Console.WriteLine("Wybrano opcję 2: Lista próbek");
+        }
+        else if (input == "0")
+        {
+            Console.WriteLine("Wybrano opcję 0: Wyjście");
+        }
+        else
+        {
+            Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
+        }
+    */
+
+    // Wybór opcji za pomocą instrukcji switch
+    switch (input)
+    {
+        case "1":
+            RegisterSample();
+            break;
+        case "2":
+            Console.WriteLine("Wybrano opcję 2: Lista próbek");
+            break;
+        case "3":
+            var location = GetLocation();
+            location.lon += 0.1f; // Przesunięcie lokalizacji o 0.1 stopnia w prawo (na wschód)
+            Console.WriteLine($"Wybrano opcję 3: Ustal lokalizację pacjenta. Lokalizacja: ({location.lat}, {location.lon})");
+            break;
+        case "0":
+            Console.WriteLine("Wybrano opcję 0: Wyjście");
+            break;
+        default:
+            Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
+            break;
+    }
 }
 
 
@@ -87,12 +91,15 @@ void RegisterSample()
 
     var firstName = Ask("Imię pacjenta: ");
     var lastName = Ask("Nazwisko pacjenta: ");
+
     Priority priority = AskPrority("Priorytet (0) rutynowy, (1) pilny, (2) cito: ");
 
 
+    PayerType payerType = AskPayerType("Typ płatnika (0) prywatny, (1) NFZ, (2) ubezpieczenie: ");
+
     // TODO: Dodaj zapis do bazy danych lub innej logiki rejestracji próbki tutaj
 
-    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel}) Priorytet: {priority}");
+    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel}) Priorytet: {priority} Typ płatnika: {payerType}");
 }
 
 // DRY - Don't Repeat Yourself (nie powtarzaj się)
@@ -135,7 +142,6 @@ int AskInt(string prompt) => int.Parse(Ask(prompt)); // Wyrażenie lambda (funkc
 
 Priority AskPrority(string prompt)
 {
-
     Priority priority;
 
     do
@@ -151,6 +157,25 @@ Priority AskPrority(string prompt)
 
     return priority;
 }
+
+PayerType AskPayerType(string prompt)
+{
+    PayerType payerType;
+
+    do
+    {
+        payerType = (PayerType)AskInt(prompt);
+
+        if (!Enum.IsDefined(payerType))
+        {
+            Console.WriteLine("Nieprawidłowy typ płatnika. Spróbuj ponownie.");
+        }
+    }
+    while (!Enum.IsDefined(payerType));
+
+    return payerType;
+}
+
 
 // Logika walidacji PESEL - sprawdzenie długości . Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
 bool IsValidPesel(string pesel) => pesel.Length == 11 && pesel.All(char.IsAsciiDigit); // Wyrażenie lambda (funkcja anonimowa) - skrócony zapis metody
@@ -191,3 +216,9 @@ enum Priority
     Cito = 2
 }
 
+enum PayerType
+{
+    Private,
+    NFZ,
+    Insurance
+}
