@@ -105,9 +105,6 @@ string Ask(string prompt)
 }
 
 // Logika walidacji PESEL - sprawdzenie długości . Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
-bool IsValidPesel(string pesel)
-{
-    return pesel.Length == 11;
-}
+bool IsValidPesel(string pesel) => pesel.Length == 11; // Wyrażenie lambda (funkcja anonimowa) - skrócony zapis metody
 
 
