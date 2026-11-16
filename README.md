@@ -25,3 +25,33 @@ Materiały do trzydniowego szkolenia z C# i .NET 10 (LTS). To repo startowe: ka�
 
 - .NET 10 SDK
 - Visual Studio 2026 lub Rider (albo edytor i `dotnet` w terminalu)
+
+## Przygotowanie środowiska (Windows)
+
+Instalacja .NET 10 SDK:
+
+```powershell
+winget install --id Microsoft.DotNet.SDK.10 --exact
+```
+
+Instalacja Git:
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+Konfiguracja Git (wpisz swoje imię, nazwisko i adres e-mail):
+
+```powershell
+git config --global user.name "Jan Kowalski"
+git config --global user.email "jan@example.com"
+```
+
+Sprawdzenie instalacji (otwórz nowe okno terminala, żeby wczytać zmienną `PATH`):
+
+```powershell
+dotnet --version
+git --version
+```
+
+`dotnet --version` powinno pokazać wersję zaczynającą się od `10.`.
