@@ -55,3 +55,11 @@ git --version
 ```
 
 `dotnet --version` powinno pokazać wersję zaczynającą się od `10.`.
+
+Przypięcie wersji SDK dla repozytorium (uruchom w głównym katalogu repo):
+
+```powershell
+dotnet new globaljson --sdk-version 10.0.404
+```
+
+Polecenie tworzy plik `global.json`, dzięki któremu wszystkie polecenia `dotnet` w tym katalogu i podkatalogach używają SDK 10.0.404 (lub nowszej poprawki z serii 10.0.4xx). Jeśli takiego SDK nie ma na komputerze, `dotnet` zgłosi błąd. Wtedy zainstaluj aktualne SDK poleceniem `winget upgrade --id Microsoft.DotNet.SDK.10`.

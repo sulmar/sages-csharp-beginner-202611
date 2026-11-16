@@ -23,6 +23,12 @@ Szczegółowe informacje o środowisku:
 dotnet --info
 ```
 
+Przypięcie wersji SDK dla katalogu (tworzy plik `global.json`):
+
+```bash
+dotnet new globaljson --sdk-version 10.0.404
+```
+
 ## Solution
 
 Utworzenie nowego pliku solution (w .NET 10 domyślnie w formacie `.slnx`):
