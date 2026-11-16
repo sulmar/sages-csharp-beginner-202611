@@ -64,23 +64,21 @@ switch (input)
 
 
 // Metoda do rejestracji próbki. void oznacza ze metoda (funkcja) nie zwraca żadnej wartości.
-void RegisterSample()
+void RegisterSample() 
 {
     Console.WriteLine("Wybrano opcję 1: Zarejestruj próbkę");
    
     var pesel = Ask("Podaj PESEL pacjenta: ");
 
     // TODO: Dodaj walidację PESEL tutaj (np. sprawdzenie długości 11 znaków i czy zawiera tylko cyfry itp.)
-
-    // ...
-    // ...
-    if (pesel.Length != 11) 
+    
+    // SOLID - Single Responsibility Principle (zasada pojedynczej odpowiedzialności) - metoda powinna mieć jedną odpowiedzialność.
+    // W tym przypadku metoda RegisterSample() zajmuje się rejestracją próbki.
+    if (!IsValidPesel(pesel))
     {
         Console.WriteLine("Nieprawidłowy format PESEL. Proszę wprowadzić 11 cyfr.");
         return; // Zakończ metodę, jeśli PESEL jest nieprawidłowy
     }
-
-
 
     var firstName = Ask("Imię pacjenta: ");
     var lastName = Ask("Nazwisko pacjenta: ");
@@ -105,4 +103,14 @@ string Ask(string prompt)
 
     return result;
 }
+
+// Logika walidacji PESEL - sprawdzenie długości. Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
+bool IsValidPesel(string pesel)
+{
+    if (pesel.Length != 11)
+        return false;
+    else
+        return true;
+}
+
 
