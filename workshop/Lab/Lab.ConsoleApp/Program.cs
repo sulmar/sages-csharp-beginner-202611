@@ -104,13 +104,10 @@ string Ask(string prompt)
     return result;
 }
 
-// Logika walidacji PESEL - sprawdzenie długości. Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
+// Logika walidacji PESEL - sprawdzenie długości . Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
 bool IsValidPesel(string pesel)
 {
-    if (pesel.Length != 11)
-        return false;
-    else
-        return true;
+    return pesel.Length == 11;
 }
 
 
