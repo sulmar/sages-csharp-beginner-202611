@@ -14,12 +14,12 @@ const string Menu = """
     === LABORATORIUM ===
     1. Zarejestruj próbkę
     2. Lista próbek
+    3. Ustal lokalizację pacjenta
     0. Wyjście
     Wybierz opcję:
     """;
 
 Console.Write(Menu);
-
 
 string input = Console.ReadLine();
 
@@ -54,6 +54,11 @@ switch (input)
     case "2":
         Console.WriteLine("Wybrano opcję 2: Lista próbek");
         break;
+    case "3":
+        var location = GetLocation();
+        location.lon += 0.1f; // Przesunięcie lokalizacji o 0.1 stopnia w prawo (na wschód)
+        Console.WriteLine($"Wybrano opcję 3: Ustal lokalizację pacjenta. Lokalizacja: ({location.lat}, {location.lon})");
+        break;
     case "0":
         Console.WriteLine("Wybrano opcję 0: Wyjście");
         break;
@@ -64,14 +69,14 @@ switch (input)
 
 
 // Metoda do rejestracji próbki. void oznacza ze metoda (funkcja) nie zwraca żadnej wartości.
-void RegisterSample() 
+void RegisterSample()
 {
     Console.WriteLine("Wybrano opcję 1: Zarejestruj próbkę");
-   
+
     var pesel = Ask("Podaj PESEL pacjenta: ");
 
     // TODO: Dodaj walidację PESEL tutaj (np. sprawdzenie długości 11 znaków i czy zawiera tylko cyfry itp.)
-    
+
     // SOLID - Single Responsibility Principle (zasada pojedynczej odpowiedzialności) - metoda powinna mieć jedną odpowiedzialność.
     // W tym przypadku metoda RegisterSample() zajmuje się rejestracją próbki.
     if (!IsValidPesel(pesel))
@@ -82,10 +87,12 @@ void RegisterSample()
 
     var firstName = Ask("Imię pacjenta: ");
     var lastName = Ask("Nazwisko pacjenta: ");
+    Priority priority = AskPrority("Priorytet (0) rutynowy, (1) pilny, (2) cito: ");
+
 
     // TODO: Dodaj zapis do bazy danych lub innej logiki rejestracji próbki tutaj
 
-    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel})");
+    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel}) Priorytet: {priority}");
 }
 
 // DRY - Don't Repeat Yourself (nie powtarzaj się)
@@ -96,15 +103,91 @@ void RegisterSample()
 // Metoda do wyświetlania komunikatu i pobierania danych od użytkownika. Przyjmuje parametr tekstowu. Zwraca wprowadzony tekst.
 string Ask(string prompt)
 {
-    Console.ForegroundColor = ConsoleColor.Blue;
+    Console.ForegroundColor = ConsoleColor.Green;
     Console.Write(prompt);
-    string result = Console.ReadLine() ?? "";
+    string response = Console.ReadLine() ?? "";
     Console.ResetColor();
+
+    return response;
+}
+
+
+// Nazwa funkcji nie może sie powtarzać
+/*
+int AskInt(string prompt)
+{
+    string response = Ask(prompt);
+
+    int result = int.Parse(response);
 
     return result;
 }
+*/
+
+/*
+int AskInt(string prompt)
+{    
+    return int.Parse(Ask(prompt));     // Złożenie funkcji - f(x) = g(h(x)) - funkcja złożona. W tym przypadku funkcja AskInt() wywołuje funkcję Ask() i przekazuje jej wynik do funkcji int.Parse().
+}
+*/
+
+int AskInt(string prompt) => int.Parse(Ask(prompt)); // Wyrażenie lambda (funkcja anonimowa) - skrócony zapis metody
+
+Priority AskPrority(string prompt)
+{
+
+    Priority priority;
+
+    do
+    {
+        priority = (Priority)AskInt(prompt);
+
+        if (!Enum.IsDefined(priority))
+        {
+            Console.WriteLine("Nieprawidłowy priorytet. Spróbuj ponownie.");
+        }
+    }
+    while (!Enum.IsDefined(priority));
+
+    return priority;
+}
 
 // Logika walidacji PESEL - sprawdzenie długości . Zwraca true jeśli PESEL jest poprawny, false w przeciwnym wypadku.
-bool IsValidPesel(string pesel) => pesel.Length == 11; // Wyrażenie lambda (funkcja anonimowa) - skrócony zapis metody
+bool IsValidPesel(string pesel) => pesel.Length == 11 && pesel.All(char.IsAsciiDigit); // Wyrażenie lambda (funkcja anonimowa) - skrócony zapis metody
 
+// Zwraca Struct
+Location GetLocation2()
+{
+    return new Location(21.90f, 51.10f, 0f); // Zwraca obiekt struktury Location z trzema wartościami typu float
+}
+
+
+// Zwraca Tuple 
+(float lat, float lon, float alt) GetLocation()
+{
+    return (21.90f, 51.10f, 0f); // Zwraca krotkę (tuple) z trzema wartościami typu float
+}
+
+
+// Struct - struktura danych, która może przechowywać różne typy danych. W tym przypadku struktura Location przechowuje trzy wartości typu float: lat, lon i alt.
+struct Location
+{
+    public float lat;
+    public float lon;
+    public float alt;
+    public Location(float lat, float lon, float alt)
+    {
+        this.lat = lat;
+        this.lon = lon;
+        this.alt = alt;
+    }
+}
+
+// Typ wyliczeniowy
+enum Priority
+{
+    Routine = 0,
+    Urgent = 1,
+    Cito = 2
+}
 
