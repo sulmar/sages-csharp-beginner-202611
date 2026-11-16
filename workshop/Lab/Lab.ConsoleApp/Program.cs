@@ -86,9 +86,25 @@ void RegisterSample()
         Console.WriteLine("Uwaga: Priorytet CITO wymaga natychmiastowej obsługi!");
     }
 
+    decimal cost = 0m;
+
+    if (payerType == PayerType.Private)
+    {
+        // cost = CalculateCost(100m, 7); // Cena netto 100 zł, stawka VAT 7%
+
+        cost = CalculateCost(netPrice: 100m); // Nazwane parmetry - pozwala na przekazanie argumentów w dowolnej kolejności, ale wymaga podania nazwy parametru.
+
+    }
+
     // TODO: Dodaj zapis do bazy danych lub innej logiki rejestracji próbki tutaj
 
-    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel}) Priorytet: {priority} Typ płatnika: {payerType}");
+    Console.WriteLine($"Zarejestrowano próbkę dla pacjenta: {firstName} {lastName} (PESEL: {pesel}) Priorytet: {priority} Typ płatnika: {payerType} Koszt: {cost}");
+}
+
+
+decimal CalculateCost(decimal netPrice, int vatRate = 23) // vatRate ma domyślną wartość 23, jeśli nie zostanie podana inna wartość
+{
+    return netPrice * (1 + vatRate / 100m); // Obliczanie ceny brutto na podstawie ceny netto i stawki VAT
 }
 
 // DRY - Don't Repeat Yourself (nie powtarzaj się)
