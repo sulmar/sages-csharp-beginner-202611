@@ -26,30 +26,15 @@ while (true)
 
     string input = Console.ReadLine();
 
+    Handle(input);
 
-    // Wybór opcji za pomocą instrukcji if-else
+}
 
-    /*
-        if (input == "1")
-        {
-            Console.WriteLine("Wybrano opcję 1: Zarejestruj próbkę");
-        }
-        else if (input == "2")
-        {
-            Console.WriteLine("Wybrano opcję 2: Lista próbek");
-        }
-        else if (input == "0")
-        {
-            Console.WriteLine("Wybrano opcję 0: Wyjście");
-        }
-        else
-        {
-            Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
-        }
-    */
 
-    // Wybór opcji za pomocą instrukcji switch
-    switch (input)
+// Wybór opcji za pomocą instrukcji switch
+void Handle(string choice)
+{
+    switch (choice)
     {
         case "1":
             RegisterSample();
@@ -94,8 +79,12 @@ void RegisterSample()
 
     Priority priority = AskPrority("Priorytet (0) rutynowy, (1) pilny, (2) cito: ");
 
-
     PayerType payerType = AskPayerType("Typ płatnika (0) prywatny, (1) NFZ, (2) ubezpieczenie: ");
+
+    if (priority == Priority.Cito)
+    {
+        Console.WriteLine("Uwaga: Priorytet CITO wymaga natychmiastowej obsługi!");
+    }
 
     // TODO: Dodaj zapis do bazy danych lub innej logiki rejestracji próbki tutaj
 
@@ -216,6 +205,7 @@ enum Priority
     Cito = 2
 }
 
+// Typ wyliczeniowy
 enum PayerType
 {
     Private,
