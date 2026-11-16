@@ -1,4 +1,8 @@
-﻿Console.WriteLine("Hello, World!"); 
+﻿using System;
+using Abc = System.Globalization; // Alias do przestrzeni nazw
+using Humanizer;
+
+Console.WriteLine("Hello, World!"); 
 Console.Write("Podaj imię: ");
 
 string name = Console.ReadLine(); // Odczyt konsoli
@@ -27,7 +31,13 @@ var y = 5; // var w c# nie oznacza dowolnego typu. Typ jest wnioskowany przed ko
 
 Console.WriteLine(y);
 
+Abc.CultureInfo.CurrentUICulture = new Abc.CultureInfo("pl-PL"); // Ustawienie prezentowania UI w konkretnym języku
+Abc.CultureInfo.CurrentCulture = new Abc.CultureInfo("en-US");
 
+Console.WriteLine(1500.ToWords());
+Console.WriteLine(TimeSpan.FromMinutes(90));
 
+Console.WriteLine(DateTime.Today); // .ToString(new Abc.CultureInfo("en-US")));
+Console.WriteLine(DateTime.Now);
 
 
