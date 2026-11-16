@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Lab.ConsoleApp/Lab.ConsoleApp.csproj" />
+  <Project Path="Lab.Domain/Lab.Domain.csproj" />
+</Solution>
