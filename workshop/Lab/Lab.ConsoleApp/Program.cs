@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-Console.WriteLine("Hello, Lab!");
+﻿Console.WriteLine("Hello, Lab!");
 
 /*
 Console.WriteLine("=== LABORATORIUM ===");
@@ -15,9 +13,38 @@ const string Menu = """
     1. Zarejestruj próbkę
     2. Lista próbek
     3. Ustal lokalizację pacjenta
+    4. Wyświetl katalog badań
     0. Wyjście
     Wybierz opcję:
     """;
+
+// Tablica kodów badań
+string[] testCodes = { "MOR", "GLU", "CRP", "KRE", "LIP" };
+
+// Słownik: klucz - wartosc słownik nazw badań (kod badania - nazwa badania)
+Dictionary<string, string> names = new()   // new() - konstruktor
+{
+    ["MOR"] = "Morfologia krwi",
+    ["GLU"] = "Glukoza",
+    ["CRP"] = "Białko C-reaktywne",
+    ["KRE"] = "Kreatynina",
+    ["LIP"] = "Lipidogram"
+};
+
+// Słownik: klucz - wartosc cennik badań (cena w złotych)
+Dictionary<string, decimal> prices = new()
+{
+    ["MOR"] = 50m,
+    ["GLU"] = 30m,
+    ["CRP"] = 40m,
+    ["KRE"] = 35m,
+    ["LIP"] = 60m
+};
+
+
+// Lista wybranych badań (kodów badań) - przechowuje kody badań wybrane przez użytkownika
+List<string> selectedTests = new();
+
 
 while (true)
 {
@@ -29,7 +56,6 @@ while (true)
     Handle(input);
 
 }
-
 
 // Wybór opcji za pomocą instrukcji switch
 void Handle(string choice)
@@ -47,8 +73,11 @@ void Handle(string choice)
             location.lon += 0.1f; // Przesunięcie lokalizacji o 0.1 stopnia w prawo (na wschód)
             Console.WriteLine($"Wybrano opcję 3: Ustal lokalizację pacjenta. Lokalizacja: ({location.lat}, {location.lon})");
             break;
+        case "4":
+            PrintCatalog();
+            break;
         case "0":
-            Console.WriteLine("Wybrano opcję 0: Wyjście");
+            PrintOrder();
             break;
         default:
             Console.WriteLine("Nieprawidłowa opcja. Spróbuj ponownie.");
@@ -56,6 +85,40 @@ void Handle(string choice)
     }
 }
 
+
+void PrintOrder()
+{
+    Console.WriteLine("Wybrane badania:");
+
+    foreach(var testCode in selectedTests)
+    {
+        Console.WriteLine($"Kod badania: {testCode} Nazwa: {names[testCode]}");
+    }
+}
+
+
+void PrintCatalog()
+{
+    //string[] testCode = new string[4];
+    //testCode[0] = "MOR";
+    //testCode[1] = "GLU";
+    //testCode[2] = "CRP";
+    //testCode[3] = "KRE";
+
+   
+
+    Console.WriteLine("Dostępne kody badań:");
+
+    //for (int i = 0; i < testCodes.Length; i++)
+    //{
+    //    Console.WriteLine(testCodes[i]);
+    //}
+
+    foreach (string testCode in testCodes)
+    {
+        Console.WriteLine(testCode);
+    }
+}
 
 // Metoda do rejestracji próbki. void oznacza ze metoda (funkcja) nie zwraca żadnej wartości.
 void RegisterSample()
@@ -81,6 +144,32 @@ void RegisterSample()
 
     PayerType payerType = AskPayerType("Typ płatnika (0) prywatny, (1) NFZ, (2) ubezpieczenie: ");
 
+    string testCode = Ask("Kod badania: ");
+
+    if (names.ContainsKey(testCode)) // Sprawdzenie czy słownik zawiera klucz testCode
+    {
+        string testName = names[testCode];
+
+        Console.WriteLine($"Wybrano badanie: {testName} (Kod: {testCode})");
+    }
+    else
+    {
+        Console.WriteLine("Nieznany kod badania.");
+    }
+
+    if (prices.TryGetValue(testCode, out decimal price)) // Sprawdzenie czy słownik zawiera klucz testCode i przypisanie wartości do zmiennej price
+    {
+        Console.WriteLine($"Cena badania: {price} zł");
+    }
+    else
+    {
+        Console.WriteLine("Nieznany kod badania.");
+    }
+
+   
+     selectedTests.Add(testCode); // Dodanie kodu badania do listy wybranych badań
+
+
     if (priority == Priority.Cito)
     {
         Console.WriteLine("Uwaga: Priorytet CITO wymaga natychmiastowej obsługi!");
@@ -92,7 +181,7 @@ void RegisterSample()
     {
         // cost = CalculateCost(100m, 7); // Cena netto 100 zł, stawka VAT 7%
 
-        cost = CalculateCost(netPrice: 100m); // Nazwane parmetry - pozwala na przekazanie argumentów w dowolnej kolejności, ale wymaga podania nazwy parametru.
+        cost = CalculateCost(vatRate: 7, netPrice: price); // Nazwane parmetry - pozwala na przekazanie argumentów w dowolnej kolejności, ale wymaga podania nazwy parametru.
 
     }
 
@@ -113,11 +202,17 @@ decimal CalculateCost(decimal netPrice, int vatRate = 23) // vatRate ma domyśln
 // W tym przypadku metoda Ask() jest przykładem zastosowania tej zasady, ponieważ pozwala na wielokrotne pobieranie danych od użytkownika bez powtarzania kodu.
 
 // Metoda do wyświetlania komunikatu i pobierania danych od użytkownika. Przyjmuje parametr tekstowu. Zwraca wprowadzony tekst.
-string Ask(string prompt)
+string Ask(string prompt, string defaultValue = "01234567891")
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.Write(prompt);
-    string response = Console.ReadLine() ?? "";
+    string? response = Console.ReadLine();
+
+    if (string.IsNullOrWhiteSpace(response))
+    {
+        response = defaultValue;
+    }
+
     Console.ResetColor();
 
     return response;
