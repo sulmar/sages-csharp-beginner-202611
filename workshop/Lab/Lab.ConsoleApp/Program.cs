@@ -1,4 +1,22 @@
-﻿Console.WriteLine("Hello, Lab!");
+﻿using Lab.Domain;
+
+Console.WriteLine("Hello, Lab!");
+
+
+LabTest labTest1 = new LabTest("MOR", "Morfologia krwi", 50m); // tworzy obiekt klasy LabTest
+LabTest labTest2 = new LabTest("GLU", "Glukoza", 30m); // tworzy obiekt klasy LabTest
+
+Console.WriteLine(labTest1.Code);
+Console.WriteLine(labTest1.Price);
+
+Console.WriteLine(labTest2.Code);
+Console.WriteLine(labTest2.Price);
+
+
+Sample sample = new Sample("ABC");
+
+Console.WriteLine(sample.Id);
+
 
 /*
 Console.WriteLine("=== LABORATORIUM ===");
@@ -13,37 +31,26 @@ const string Menu = """
     1. Zarejestruj próbkę
     2. Lista próbek
     3. Ustal lokalizację pacjenta
-    4. Wyświetl katalog badań
+    4. Wyświetl katalog badań z cenami    
     0. Wyjście
     Wybierz opcję:
     """;
 
 // Tablica kodów badań
-string[] testCodes = { "MOR", "GLU", "CRP", "KRE", "LIP" };
+/// string[] testCodes = { "MOR", "GLU", "CRP", "KRE", "LIP" };
 
 // Słownik: klucz - wartosc słownik nazw badań (kod badania - nazwa badania)
-Dictionary<string, string> names = new()   // new() - konstruktor
+Dictionary<string, LabTest> labTests = new()   // new() - konstruktor
 {
-    ["MOR"] = "Morfologia krwi",
-    ["GLU"] = "Glukoza",
-    ["CRP"] = "Białko C-reaktywne",
-    ["KRE"] = "Kreatynina",
-    ["LIP"] = "Lipidogram"
+    ["MOR"] = new LabTest("MOR", "Morfologia krwi", 50m),
+    ["GLU"] = new LabTest("GLU", "Glukoza", 30m),
+    ["CRP"] = new LabTest("CRP", "Białko C-reaktywne", 40m),
+    ["KRE"] = new LabTest("KRE", "Kreatynina", 35m),
+    ["LIP"] =  new LabTest("LIP", "Lipidogram", 60m)
 };
-
-// Słownik: klucz - wartosc cennik badań (cena w złotych)
-Dictionary<string, decimal> prices = new()
-{
-    ["MOR"] = 50m,
-    ["GLU"] = 30m,
-    ["CRP"] = 40m,
-    ["KRE"] = 35m,
-    ["LIP"] = 60m
-};
-
 
 // Lista wybranych badań (kodów badań) - przechowuje kody badań wybrane przez użytkownika
-List<string> selectedTests = new();
+List<LabTest> selectedTests = new();
 
 
 while (true)
@@ -74,8 +81,8 @@ void Handle(string choice)
             Console.WriteLine($"Wybrano opcję 3: Ustal lokalizację pacjenta. Lokalizacja: ({location.lat}, {location.lon})");
             break;
         case "4":
-            PrintCatalog();
-            break;
+            PrintLabTests();
+            break;        
         case "0":
             PrintOrder();
             break;
@@ -90,35 +97,38 @@ void PrintOrder()
 {
     Console.WriteLine("Wybrane badania:");
 
-    foreach(var testCode in selectedTests)
+    foreach (var labTest in selectedTests)
     {
-        Console.WriteLine($"Kod badania: {testCode} Nazwa: {names[testCode]}");
+        Console.WriteLine($"Kod badania: {labTest.Code} Nazwa: {labTest.Name}");
     }
 }
 
 
-void PrintCatalog()
+//void PrintStringDictionary(Dictionary<string, string> dictionary)
+//{
+//    foreach (var item in dictionary)
+//    {
+//        Console.WriteLine($"{item.Key}: {item.Value}");
+//    }
+//}
+
+//void PrintDecimalDictionary(Dictionary<string, decimal> dictionary)
+//{
+//    foreach (var item in dictionary)
+//    {
+//        Console.WriteLine($"{item.Key}: {item.Value}");
+//    }
+//}
+
+
+void PrintLabTests()
 {
-    //string[] testCode = new string[4];
-    //testCode[0] = "MOR";
-    //testCode[1] = "GLU";
-    //testCode[2] = "CRP";
-    //testCode[3] = "KRE";
-
-   
-
-    Console.WriteLine("Dostępne kody badań:");
-
-    //for (int i = 0; i < testCodes.Length; i++)
-    //{
-    //    Console.WriteLine(testCodes[i]);
-    //}
-
-    foreach (string testCode in testCodes)
+    foreach (var labTest in labTests)
     {
-        Console.WriteLine(testCode);
+        Console.WriteLine($"{labTest.Value.Code} {labTest.Value.Name} {labTest.Value.Price}");
     }
 }
+
 
 // Metoda do rejestracji próbki. void oznacza ze metoda (funkcja) nie zwraca żadnej wartości.
 void RegisterSample()
@@ -146,29 +156,20 @@ void RegisterSample()
 
     string testCode = Ask("Kod badania: ");
 
-    if (names.ContainsKey(testCode)) // Sprawdzenie czy słownik zawiera klucz testCode
-    {
-        string testName = names[testCode];
+    LabTest labTest = null;
 
-        Console.WriteLine($"Wybrano badanie: {testName} (Kod: {testCode})");
+    if (labTests.ContainsKey(testCode)) // Sprawdzenie czy słownik zawiera klucz testCode
+    {
+        labTest = labTests[testCode];        
+
+        Console.WriteLine($"Wybrano badanie: {labTest.Name} (Kod: {labTest.Code}) Cena: {labTest.Price}");
     }
     else
     {
         Console.WriteLine("Nieznany kod badania.");
     }
 
-    if (prices.TryGetValue(testCode, out decimal price)) // Sprawdzenie czy słownik zawiera klucz testCode i przypisanie wartości do zmiennej price
-    {
-        Console.WriteLine($"Cena badania: {price} zł");
-    }
-    else
-    {
-        Console.WriteLine("Nieznany kod badania.");
-    }
-
-   
-     selectedTests.Add(testCode); // Dodanie kodu badania do listy wybranych badań
-
+    selectedTests.Add(labTest); // Dodanie badania do listy wybranych badań
 
     if (priority == Priority.Cito)
     {
@@ -181,7 +182,7 @@ void RegisterSample()
     {
         // cost = CalculateCost(100m, 7); // Cena netto 100 zł, stawka VAT 7%
 
-        cost = CalculateCost(vatRate: 7, netPrice: price); // Nazwane parmetry - pozwala na przekazanie argumentów w dowolnej kolejności, ale wymaga podania nazwy parametru.
+        cost = CalculateCost(vatRate: 7, netPrice: labTest.Price); // Nazwane parmetry - pozwala na przekazanie argumentów w dowolnej kolejności, ale wymaga podania nazwy parametru.
 
     }
 
