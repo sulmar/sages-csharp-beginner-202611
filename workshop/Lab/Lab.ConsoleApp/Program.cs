@@ -3,6 +3,23 @@
 Console.WriteLine("Hello, Lab!");
 
 
+Sample sample = new Sample("ABC");
+
+Console.WriteLine(sample);
+sample.Status = SampleStatus.Completed;
+
+// sample.Start();
+Console.WriteLine(sample);
+// sample.Complete();
+Console.WriteLine(sample);
+
+Console.WriteLine(sample.Status);
+
+
+return;
+
+
+
 LabTest labTest1 = new LabTest("MOR", "Morfologia krwi", 50m); // tworzy obiekt klasy LabTest
 LabTest labTest2 = new LabTest("GLU", "Glukoza", 30m); // tworzy obiekt klasy LabTest
 
@@ -13,9 +30,6 @@ Console.WriteLine(labTest2.Code);
 Console.WriteLine(labTest2.Price);
 
 
-Sample sample = new Sample("ABC");
-
-Console.WriteLine(sample.Id);
 
 
 /*

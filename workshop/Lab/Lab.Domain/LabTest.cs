@@ -44,10 +44,54 @@ namespace Lab.Domain
 
     public class Sample
     {
-        public Guid Id;
-        public string Code;
-        public DateTime RegisteredAt;
-        public SampleStatus Status;
+        public Guid Id { get; set; }
+        public string Code { get; set; }
+        public DateTime RegisteredAt { get; set; } // Pola
+
+        /* 
+
+        // prywatna zmienna (back field)
+        private SampleStatus _status; // Pola
+
+        public SampleStatus Status  // Właściwość (Property)
+        {
+            // Getter
+            get
+            {
+                return _status;
+            }
+
+            // Setter
+            private set
+            {
+                // walidacja ... 
+
+                _status = value;
+            }
+        }
+
+        */
+
+
+        // Skrócona definicja właściwosci
+        public SampleStatus Status { get; private set; }
+
+
+       /*
+        // Get
+        public SampleStatus GetStatus()
+        {
+            return _status;
+        }     
+
+        // Set
+        public void SetStatus(SampleStatus status)
+        {
+            // walidacja ...
+            _status = status;
+        }
+
+        */
 
         public Sample(string code)
         {
@@ -60,12 +104,22 @@ namespace Lab.Domain
 
         public void Start()
         {
-            Status = SampleStatus.InProgress;
+            if (Status == SampleStatus.Registered)
+            {
+                Status = SampleStatus.InProgress;
+            }
+
+            // TODO: zglos blad
         }
 
         public void Complete()
         {
             Status = SampleStatus.Completed;
+        }
+
+        public override string ToString()
+        {
+            return $"Id: {Id} Code: {Code} RegisteredAt: {RegisteredAt} Status: {Status}";
         }
     }
 
