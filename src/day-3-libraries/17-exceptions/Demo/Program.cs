@@ -2,9 +2,21 @@
 
 Console.WriteLine("Hello, Exceptions!");
 
+
+//try
+//{
+
+    Shipment shipment1 = new Shipment(1, "a", 20);
+    ShipmentCalculator calculator = new ShipmentCalculator();
+    calculator.Calculate(shipment1, 10, 0m);
+//}
+// catch { } // ! NIE WOLNO
+
+
+
 try
 {
-    Shipment shipment = new Shipment(1, "a", 21);
+    Shipment shipment = new Shipment(1, "a", 20);
 }
 catch(Exception e)
 {
@@ -14,6 +26,9 @@ catch(Exception e)
 
     File.AppendAllText("log.txt", $"{DateTime.Now}|Error|{e.Message}\n");
 }
+
+
+
 
 return;
 

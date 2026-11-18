@@ -11,6 +11,8 @@ namespace Demo
         public string Recipient { get; set; }
         public decimal Weight { get; set; }
 
+        private bool isSent = false;
+
         public Shipment(int number, string recipient, decimal weight)
         {
             if (number <= 0)
@@ -27,12 +29,18 @@ namespace Demo
             this.Recipient = recipient;
             this.Weight = weight;
         }
+
+        public void Send()
+        {
+            throw new NotImplementedException();
+        }
+        
     }
 
 
     internal class ShipmentCalculator
     {
-        public decimal Calculate(Shipment shipment, decimal costPerKg)
+        public decimal Calculate(Shipment shipment, decimal costPerKg, decimal ratio)
         {
             if (shipment == null)
                 throw new ArgumentNullException(nameof(shipment));
@@ -41,7 +49,7 @@ namespace Demo
                 throw new ArgumentException(nameof(costPerKg), "Koszt nie może ujemny.");
 
             // algorytm
-            return shipment.Weight * costPerKg;
+            return shipment.Weight * costPerKg / ratio;
         }
     }
 }
