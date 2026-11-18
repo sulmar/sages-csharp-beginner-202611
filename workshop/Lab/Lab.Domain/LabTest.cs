@@ -44,9 +44,9 @@ namespace Lab.Domain
 
     public class Sample
     {
-        public Guid Id { get; set; }
-        public string Code { get; set; }
-        public DateTime RegisteredAt { get; set; } // Pola
+        public Guid Id { get; private set; }
+        public string Code { get; private set; }
+        public DateTime RegisteredAt { get; private set; } // Pola
 
         /* 
 
